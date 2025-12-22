@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    body {
+        text-align: center;
+        font-family: consolas;
+    }
+    ul {
+    list-style-type: none;
+    }
+</style>
+<body>
+    <h2>Add user</h2>
+    <form action="/submit" method="post">
+        <label for="username">Username: </label>
+        <input type="text" id="username" name="username"><br><br>
+
+        <label for="language">Choose your language</label>
+        <select name="language" id="language">
+            <option value="polish">Polish</option>
+            <option value="english">English</option>
+            <option value="spanish">Spanish</option>
+        </select>
+        <button>Send</button>
+    </form>
+    <h2>List of users</h2>
+    <ul>
+        {% for user in users %}
+            <li>{{ user.username }} - Language: {{user.language }} (ID: {{ user.id }})</li>
+        {% endfor %}
+    </ul>
+    {% if not users %}
+        <p>Database is empty</p>
+    {% endif %}
+</body>
+</html>
