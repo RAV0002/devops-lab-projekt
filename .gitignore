@@ -1,0 +1,19 @@
+# Środowisko wirtualne
+venv/
+venv_win/
+env/
+
+# Pliki tymczasowe Pythona
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Pliki konfiguracyjne systemowe
+.DS_Store
+Thumbs.db
+
+# Pliki baz danych 
+*.db
+
+# Pliki środowiskowe
+.env
