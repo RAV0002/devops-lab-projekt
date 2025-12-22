@@ -34,9 +34,10 @@ def submit():
     if request.method == 'POST':
         username=request.form['username']
         language=request.form['language']
-    user = User(username,language)
-    db.session.add(user)
-    db.session.commit()
+    if(username):
+        user = User(username,language)
+        db.session.add(user)
+        db.session.commit()
 
     return redirect(url_for('index'))
 
