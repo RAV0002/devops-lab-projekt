@@ -27,7 +27,7 @@ def health_check():
 @app.route('/')
 def index():
     all_users = User.query.all()
-    return render_template('index.html', users=all_users)
+    return render_template('index.html', users=all_users), 200
 
 @app.route('/submit',methods=['POST'])
 def submit():
