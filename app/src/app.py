@@ -1,11 +1,14 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:admin123@localhost/users'
+# Pobiera URL bazy z systemu (z Docker Compose), a jeśli go nie ma, używa domyślnego
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://user:pass@localhost:5432/db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db=SQLAlchemy(app)
+db = SQLAlchemy(app)
 
 # Model
 
@@ -42,4 +45,7 @@ def submit():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    with app.app_context():
+        db.create_all()
+        print("Baza danych została zainicjalizowana!")
+    app.run(host="0.0.0.0",port=5000)

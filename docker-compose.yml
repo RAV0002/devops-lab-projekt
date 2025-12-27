@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: dev_database
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    container_name: flask_app
+    ports:
+      - "5000:5000"
+    environment:
+      # Zwróć uwagę: zamiast localhost wpisujemy 'db' (nazwę usługi powyżej)
+      DATABASE_URL: postgresql://dev_user:dev_password@db:5432/dev_database
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
