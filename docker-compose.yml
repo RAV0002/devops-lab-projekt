@@ -6,9 +6,9 @@ services:
     container_name: postgres_db
     restart: always
     environment:
-      POSTGRES_USER: dev_user
-      POSTGRES_PASSWORD: dev_password
-      POSTGRES_DB: dev_database
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: db
     ports:
       - "5432:5432"
     volumes:
@@ -20,8 +20,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      # Zwróć uwagę: zamiast localhost wpisujemy 'db' (nazwę usługi powyżej)
-      DATABASE_URL: postgresql://dev_user:dev_password@db:5432/dev_database
+      DATABASE_URL: postgresql://user:pass@db:5432/db
     depends_on:
       - db
 
