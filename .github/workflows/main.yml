@@ -1,0 +1,73 @@
+name: Devops Lab Project Pipeline
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+# Continuous Integration
+  ci-pipeline:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - name: 1. Checkout code
+        uses: actions/checkout@v3
+
+      - name: 2. Build image (builder stage)
+        run: docker build --target builder -t flask-app-builder .
+
+      - name: 3. Run test stage (pytest)
+        run: docker build --target test -t flask-app-test .
+
+      - name: 4. Build final image
+        run: docker build --target final -t "${{ secrets.ACR_LOGIN_SERVER }}/flask-app:${{ github.sha }}" .
+
+      - name: 5. Login to Azure ACR
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: 6. Push image to ACR
+        run: |
+          docker tag "${{ secrets.ACR_LOGIN_SERVER }}/flask-app:${{ github.sha }}" "${{ secrets.ACR_LOGIN_SERVER }}/flask-app:latest"
+          docker push "${{ secrets.ACR_LOGIN_SERVER }}/flask-app:${{ github.sha }}"
+          docker push "${{ secrets.ACR_LOGIN_SERVER }}/flask-app:latest"
+
+      - name: 7. CodeQL scan (minimalna konfiguracja)
+        uses: github/codeql-action/init@v2
+        with:
+          languages: python
+      
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+# Continuous Deployment
+  cd-pipeline:
+    needs: ci-pipeline
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. Checkout code
+        uses: actions/checkout@v3
+
+      - name: 2. Login to ACR
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: 3. Docker Compose Pull
+        run: docker compose pull
+
+      - name: 4. Docker Compose Up (Restart aplikacji)
+        run: docker compose up -d
