@@ -1,4 +1,6 @@
 import sys
+import csv
+import json
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
@@ -24,6 +26,25 @@ def seed_data():
                 print(f"Added user: {user.username}")
         db.session.commit()
         print("Data base has been filled")
+        os.makedirs('seed/output', exist_ok=True)
+
+        # CSV
+        with open('seed/output/users.csv', 'w', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=["username","language"])
+            writer.writeheader()
+            for user in users:
+                writer.writerow({'username':user.username, 'language':user.language})
+
+        #JSON
+        with open('seed/output/data.json','w') as file:
+            json_data_list = [{"username":user.username, "language":user.language} for user in users]
+            json.dump(json_data_list,file,indent=4)
+
+        # LOG
+        with open('seed/output/seed.log','w') as file:
+            file.write("Seeder added 5 users.\n")
+        
+        print("Seeding is completed!")
 
 if __name__ == '__main__':
     seed_data()

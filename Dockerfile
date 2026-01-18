@@ -5,6 +5,9 @@ COPY app/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY app/ .
 
+# Seeder
+RUN mkdir /output
+CMD [ "python", "seed/run_seed.py" ]
 # Test
 FROM builder AS test
 ENV PYTHONPATH=/app
